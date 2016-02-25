@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>GUID分区表(GPT) 详解 - Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="许多的技术文档还在教导着MBR的知识。 当然，对于初学者来说，这是一门必修课。随着信息爆炸时代的到来，人们渐渐注意到MBR在大容量存储时代的局限性。现在，越来越多的网友开始查询MBR的 替代品以及突破2TB分区局限性的方法。这里，我们为大家介绍一篇关于GPT详解的范文，希望能帮助您快速迈入GPT的时代。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GUID分区表(GPT) 详解">
+<meta property="og:url" content="http://acechao.github.io/blog/2014/12/17/GPT-fenqu/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="许多的技术文档还在教导着MBR的知识。 当然，对于初学者来说，这是一门必修课。随着信息爆炸时代的到来，人们渐渐注意到MBR在大容量存储时代的局限性。现在，越来越多的网友开始查询MBR的 替代品以及突破2TB分区局限性的方法。这里，我们为大家介绍一篇关于GPT详解的范文，希望能帮助您快速迈入GPT的时代。">
+<meta property="og:image" content="http://dn-acechao.qbox.me/2015-01-0511.jpg">
+<meta property="og:image" content="http://i.imgur.com/Lhe4dE0.png">
+<meta property="og:updated_time" content="2015-10-19T11:06:54.759Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="GUID分区表(GPT) 详解">
+<meta name="twitter:description" content="许多的技术文档还在教导着MBR的知识。 当然，对于初学者来说，这是一门必修课。随着信息爆炸时代的到来，人们渐渐注意到MBR在大容量存储时代的局限性。现在，越来越多的网友开始查询MBR的 替代品以及突破2TB分区局限性的方法。这里，我们为大家介绍一篇关于GPT详解的范文，希望能帮助您快速迈入GPT的时代。">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="/blog/webfonts/ptserif/main.css" rel='stylesheet' type='text/css'>
+  <link href="/blog/webfonts/source-code-pro/main.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/blog/css/style.css" type="text/css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-inner" class="inner">
+      <a id="main-nav-toggle" class="nav-icon" href="javascript:;"></a>
+      <a id="logo" class="logo logo-text" href="/">acechao&#39;s blog</a>
+      <nav id="main-nav">
+        
+          <a class="main-nav-link" href="/blog/archives">Archives</a>
+        
+          <a class="main-nav-link" href="/blog/android">Android</a>
+        
+          <a class="main-nav-link" href="/blog/more">Works</a>
+        
+          <a class="main-nav-link" href="/blog/about">About</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        <div id="search-form-wrap">
+          <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://acechao.github.io/blog"></form>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+    <section id="main" class="outer"><article id="post-GPT-fenqu" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      GUID分区表(GPT) 详解
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      <a href="/blog/2014/12/17/GPT-fenqu/" class="article-date">
+  <time datetime="2014-12-17T07:32:00.000Z" itemprop="datePublished">2014-12-17</time>
+</a>
+      
+  <div class="article-category">
+    <a class="article-category-link" href="/blog/categories/系统/">系统</a>
+  </div>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>许多的技术文档还在教导着MBR的知识。 当然，对于初学者来说，这是一门必修课。随着信息爆炸时代的到来，人们渐渐注意到MBR在大容量存储时代的局限性。现在，越来越多的网友开始查询MBR的 替代品以及突破2TB分区局限性的方法。这里，我们为大家介绍一篇关于GPT详解的范文，希望能帮助您快速迈入GPT的时代。  </p>
+<hr>
+<a id="more"></a> 
+<h2 id="一、了解-MBR-方案的局限："><a href="#一、了解-MBR-方案的局限：" class="headerlink" title="一、了解 MBR 方案的局限："></a>一、了解 MBR 方案的局限：</h2><p>主引导记录 (MBR) 分区方案是多数操作系统采用的传统分区方案。MBR 本身完全保存在硬盘的第一个扇区（512 字节）。在该空间中，MBR 的前 440 字节用于引导程序。BIOS 在计算机启动时读取并执行此代码。此代码区域之后的数据空间用于保存有关四个分区的信息，即主分区。每个分区采用两种描述方式：使用柱面/磁头/扇区 (CHS) 的表示法，以及逻辑块寻址 (LBA) 的表示法。CHS 表示法已不再使用，因为它局限于 24 位，仅可满足 8GB 的磁盘空间。32 位的 LBA 值可满足多达 2TB。<strong>由于 MBR 未剩下任何空间用于增加 LBA 大小，也限制了 MBR 仅可访问 2TB 的磁盘空间。</strong>  </p>
+<p><strong>MBR 的另一个缺点在于</strong>，计算机硬盘的数据存储总空间最多只能划分为四个分区。如果硬盘上需要超过四个分区，则需要创建名为扩展分区的特殊分区。此类分区存在数 据完整性问题，因为它们是单一数据结构，容易因为疏忽或硬盘故障而损坏。此外，扩展分区数据结构没有任何形式的错误检测功能，<strong>因此难以定位损坏</strong>。  </p>
+<h2 id="二、GUID-分区表方案——新的标准："><a href="#二、GUID-分区表方案——新的标准：" class="headerlink" title="二、GUID 分区表方案——新的标准："></a>二、GUID 分区表方案——新的标准：</h2><p>GUID 分区表 (GPT) 是物理硬盘上的分区表布局的新标准。它是英特尔提出的可扩展固件接口 (EFI) 标准的一部分，该标准是 PC BIOS 的替代品。GPT 采用 64 位磁盘指针，允许 9.4 泽字节或 94 亿太字节的最大磁盘分区大小。<br><strong>使 用 GPT 磁盘的另一项优势</strong>就是克服了 MBR 磁盘的 4 个主分区限制。GPT 支持最多 128 个主分区。GPT 数据结构在磁盘上彻底地进行双重定义和保存：一次在开头，一次在末尾。这样提高了从事故或坏扇区导致的损坏中成功恢复数据的可能性。此外，关键数据结构将 计算循环冗余检验 (CRC) 值，从而提高检测到数据损坏的可能性。下图显示了 GPT 磁盘的布局和数据结构的保存方式。<br><img src="http://dn-acechao.qbox.me/2015-01-0511.jpg" alt=""> </p>
+<p>并 非所有的 Windows 操作系统都完全支持 GPT 磁盘。从 Windows Server 2003 SP1 起，GPT 磁盘可用作数据盘，但不能作为引导盘。从 Windows Server 2008 起，仅 x64 版本的 Microsoft 操作系统支持 GPT 磁盘在 EFI（可扩展固件接口）启动模式中作为引导盘。引导至 Windows 操作系统时，GPT 磁盘在 BIOS 模式中不支持作为引导盘。  </p>
+<p>下表中的信息是 Microsoft 操作系统对于各种分区方案提供的基本支持:  </p>
+<p><img src="http://i.imgur.com/Lhe4dE0.png" alt=""></p>
+<h2 id="三、选择分区方案"><a href="#三、选择分区方案" class="headerlink" title="三、选择分区方案"></a>三、选择分区方案</h2><p>选择分区方案的主要考虑因素是硬盘大小、操作系统版本和操作系统中使用的软件工具。</p>
+<p> 对 于在小于 2 TB 的硬盘上运行，且使用传统软件工具（仅识别 MBR 方案）的较老 Microsoft 操作系统的用户，MBR 分区方案是最佳选择。对于在超过 2 TB 的硬盘上运行 Windows Server 2008 R2、Windows Server 2008 或 Windows Small Business Server 2008 等较新操作系统的用户，可使用 GPT 分区方案。  </p>
+<p>在可行的情况下，建议应使用 GPT 分区方案，因为它更加灵活，支持容量较大的硬盘，并且具备 MBR 分区方案未提供的大量功能和恢复机制。  </p>
+<p>参考：  </p>
+<p>关于 GPT 磁盘——<a href="http://www.microsoft.com/whdc/device/storage/gpt_faq.mspx" target="_blank" rel="external">http://www.microsoft.com/whdc/device/storage/gpt_faq.mspx</a><br>磁盘管理概述——<a href="http://technet.microsoft.com/en-us/library/dd163558.aspx" target="_blank" rel="external">http://technet.microsoft.com/en-us/library/dd163558.aspx</a><br>分区和卷——<a href="http://technet.microsoft.com/en-us/library/dd163559.aspx" target="_blank" rel="external">http://technet.microsoft.com/en-us/library/dd163559.aspx</a></p>
+
+      
+    </div>
+  
+    <footer class="article-footer">
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/硬盘分区格式-GPT分区/">硬盘分区格式,GPT分区</a></li></ul>
+
+    </footer>
+  
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/10/19/Android-Support-Design-Libiary/" id="article-nav-newer" class="article-nav-link-wrap">
+      <div class="article-nav-title"><span>&lt;</span>&nbsp;
+        
+          Android Design Support Library介绍
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+</section>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 John Doe&nbsp;
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, theme by <a href="http://github.com/ppoffice">PPOffice</a>
+    </div>
+  </div>
+</footer>
+    
+
+<script src="/blog/js/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.css" type="text/css">
+  <script src="/blog/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+
+
+<script src="/blog/js/script.js" type="text/javascript"></script>
+  </div>
+</body>
+</html>
