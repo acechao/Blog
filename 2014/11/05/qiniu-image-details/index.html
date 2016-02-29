@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>七牛云图片处理教程 - acechao的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="本篇文章主讲七牛云图片处理的相关原理。处理方式，在下载URL后附加处理指令，规则如下：
+http://&amp;lt;Bucket&amp;gt;.qiniudn.com/&amp;lt;Key&amp;gt;?&amp;lt;Fop&amp;gt;
+或
+ http://&amp;lt;Domain&amp;gt;/&amp;lt;Key&amp;gt;?&amp;lt;Fop&amp;gt;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="七牛云图片处理教程">
+<meta property="og:url" content="http://acechao.github.io/blog/2014/11/05/qiniu-image-details/index.html">
+<meta property="og:site_name" content="acechao的博客">
+<meta property="og:description" content="本篇文章主讲七牛云图片处理的相关原理。处理方式，在下载URL后附加处理指令，规则如下：
+http://&amp;lt;Bucket&amp;gt;.qiniudn.com/&amp;lt;Key&amp;gt;?&amp;lt;Fop&amp;gt;
+或
+ http://&amp;lt;Domain&amp;gt;/&amp;lt;Key&amp;gt;?&amp;lt;Fop&amp;gt;">
+<meta property="og:image" content="http://dn-acechao.qbox.me/可儿.jpg?imageView2/1/w/320/h/400">
+<meta property="og:image" content="http://dn-acechao.qbox.me/可儿.jpg?imageView2/1/w/150/h/150">
+<meta property="og:image" content="http://dn-acechao.qbox.me/可儿.jpg?imageMogr2/thumbnail/300x300/gravity/North/crop/300x185">
+<meta property="og:image" content="http://dn-acechao.qbox.me/可儿.jpg?imageView2/1/w/480/h/320/q/95/format/JPEG|watermark/2/text/YWNlY2hhby5naXRodWIuaW8=/font/5b6u6L2v6ZuF6buR/fontsize/600/fill/I0ZGRkZGRg==/dissolve/100/gravity/SouthEast/dx/10/dy/10">
+<meta property="og:updated_time" content="2016-02-29T05:08:11.919Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="七牛云图片处理教程">
+<meta name="twitter:description" content="本篇文章主讲七牛云图片处理的相关原理。处理方式，在下载URL后附加处理指令，规则如下：
+http://&amp;lt;Bucket&amp;gt;.qiniudn.com/&amp;lt;Key&amp;gt;?&amp;lt;Fop&amp;gt;
+或
+ http://&amp;lt;Domain&amp;gt;/&amp;lt;Key&amp;gt;?&amp;lt;Fop&amp;gt;">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="/blog/webfonts/ptserif/main.css" rel='stylesheet' type='text/css'>
+  <link href="/blog/webfonts/source-code-pro/main.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/blog/css/style.css" type="text/css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-inner" class="inner">
+      <a id="main-nav-toggle" class="nav-icon" href="javascript:;"></a>
+      <a id="logo" class="logo logo-text" href="/">acechao&#39;s blog</a>
+      <nav id="main-nav">
+        
+          <a class="main-nav-link" href="/blog/archives">Archives</a>
+        
+          <a class="main-nav-link" href="/blog/categories/Android">Android</a>
+        
+          <a class="main-nav-link" href="/blog/work">Works</a>
+        
+          <a class="main-nav-link" href="/blog/about">About</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        <div id="search-form-wrap">
+          <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://acechao.github.io/blog"></form>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+    <section id="main" class="outer"><article id="post-qiniu-image-details" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      七牛云图片处理教程
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      <a href="/blog/2014/11/05/qiniu-image-details/" class="article-date">
+  <time datetime="2014-11-04T16:00:00.000Z" itemprop="datePublished">2014-11-05</time>
+</a>
+      
+  <div class="article-category">
+    <a class="article-category-link" href="/blog/categories/七牛云/">七牛云</a>
+  </div>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本篇文章主讲七牛云图片处理的相关原理。<br>处理方式，<strong>在下载URL后附加处理指令</strong>，规则如下：</p>
+<pre><code>http://&lt;Bucket&gt;.qiniudn.com/&lt;Key&gt;?&lt;Fop&gt;
+或
+ http://&lt;Domain&gt;/&lt;Key&gt;?&lt;Fop&gt;
+</code></pre><a id="more"></a>  
+<p>###缩略图</p>
+<blockquote>
+<p><b> imageView2是简化的图片处理接口，提供有限的图片处理功能  </b></p>
+</blockquote>
+<p> 以下面这张图做示例.原图（320*400）：  </p>
+<p><img src="http://dn-acechao.qbox.me/可儿.jpg?imageView2/1/w/320/h/400" alt="">  </p>
+<p>如想获得150x150的<strong>居中裁剪缩略图</strong>，可将下载URL写成如下形式：</p>
+<pre><code>http://dn-acechao.qbox.me/errno-404?imageView2/1/w/150/h/150
+</code></pre><p>问号后的部分是具体处理规格：  </p>
+<pre><code>注释 :
+imageView2/1指定使用imageView2处理接口的1号模式；“1”可以换成2、3、具体区别自己试试
+w参数限定缩略图的宽度；
+h参数限定缩略图的长度。
+</code></pre><p>处理结果:<br><img src="http://dn-acechao.qbox.me/可儿.jpg?imageView2/1/w/150/h/150" alt=""></p>
+<p>###裁剪</p>
+<blockquote>
+<p><b>七牛云存储还提供名为imageMogr2的处理接口，支持更丰富的处理功能。</b></p>
+</blockquote>
+<p>比如想获得<strong>正上方的裁剪缩略图</strong>时，可将下载URL写成如下形式：</p>
+<pre><code>?imageMogr2/thumbnail/300x300/gravity/North/crop/300x185
+</code></pre><p>其中，</p>
+<pre><code>imageMogr2指定使用imageMogr2处理接口；
+thumbnail参数指定第一步先进行全图缩略，尺寸为300x300；
+gravity参数将裁剪锚点定位到正上方（也即TopCenter）；
+crop参数指示第二步对缩略图进行裁剪，尺寸为300x185。
+</code></pre><p>实际效果如下图所示：  </p>
+<p><img src="http://dn-acechao.qbox.me/可儿.jpg?imageMogr2/thumbnail/300x300/gravity/North/crop/300x185" alt=""></p>
+<p>注意：该接口的各个指令参数是以书写顺序来逐步处理数据的。</p>
+<p>###文字水印</p>
+<p>要给图片打上水印也很方便。以文字水印为例：   </p>
+<pre><code>http://dn-acechao.qbox.me/可儿.jpg?watermark/2/text/54mb5bCP5LiD/gravity/SouthEast/fontsize/600
+</code></pre><p>其中，</p>
+<pre><code>watermark/2指定使用watermark处理接口的2号模式，即文字水印；
+text参数给出文字内容，经过UrlSafe-Base64编码；
+gravity参数指定水印锚点，此处设置在原图右下角；
+fontsize参数指定字号，此处为600。
+</code></pre><p>实际效果如下图所示：<br><img src="http://dn-acechao.qbox.me/可儿.jpg?imageView2/1/w/480/h/320/q/95/format/JPEG|watermark/2/text/YWNlY2hhby5naXRodWIuaW8=/font/5b6u6L2v6ZuF6buR/fontsize/600/fill/I0ZGRkZGRg==/dissolve/100/gravity/SouthEast/dx/10/dy/10" alt=""><br>特别说明</p>
+<pre><code>本文所使用的图片处理接口都属于同步调用，计算过程会产生些许延迟，通常可以忽略不计；
+为加速下载，处理结果将被七牛云自动缓存，不计入存储空间，过期将失效并在下一次访问时重新处理。
+</code></pre>
+      
+    </div>
+  
+    <footer class="article-footer">
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/图片处理/">图片处理</a></li></ul>
+
+    </footer>
+  
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2014/12/17/GPT-fenqu/" id="article-nav-newer" class="article-nav-link-wrap">
+      <div class="article-nav-title"><span>&lt;</span>&nbsp;
+        
+          GUID分区表(GPT) 详解
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+</section>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 acechao&nbsp;
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, theme by <a href="http://github.com/ppoffice">PPOffice</a>
+    </div>
+  </div>
+</footer>
+    
+
+<script src="/blog/js/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.css" type="text/css">
+  <script src="/blog/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+
+
+<script src="/blog/js/script.js" type="text/javascript"></script>
+  </div>
+</body>
+</html>
