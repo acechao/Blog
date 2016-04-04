@@ -1,0 +1,17 @@
+#Header
+logo_text: acechao's blog
+menu:
+  Home: /
+  Archives: archives
+  Categories: categories
+  Tags: tags
+  About: about
+  Android: android
+  
+#Content
+excerpt_link: Read More
+fancybox: true
+
+#Miscellaneous
+google_analytics:
+favicon: /favicon.png
